@@ -16,7 +16,7 @@ citation binding, assembles the signed payload and returns a fully signed
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from .citations import bind_citations
 from .crypto import SigningKey
@@ -113,7 +113,7 @@ class ReceiptBuilder:
 
         payload = ReceiptPayload(
             receipt_id=receipt_id or str(uuid.uuid4()),
-            created_at=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            created_at=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
             query=self._query,
             answer=self._answer,
             principal=self._principal,

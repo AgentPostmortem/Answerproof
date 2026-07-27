@@ -20,8 +20,12 @@ import json
 from answerproof import ReceiptBuilder, SigningKey, verify_receipt
 
 KNOWLEDGE_BASE = {
-    "doc-eiffel": "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France.",
-    "doc-height": "The Eiffel Tower is 330 metres tall and was completed in 1889 for the World's Fair.",
+    "doc-eiffel": (
+        "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France."
+    ),
+    "doc-height": (
+        "The Eiffel Tower is 330 metres tall and was completed in 1889 for the World's Fair."
+    ),
     "doc-louvre": "The Louvre in Paris is the world's most-visited art museum.",
     "doc-weather": "Paris has a temperate oceanic climate with mild summers.",
 }

@@ -85,8 +85,9 @@ def _render_page(receipt: Receipt, verdict) -> str:
 <html lang="en"><head><meta charset="utf-8">
 <title>answerproof receipt {p.receipt_id}</title>
 <style>
-body{{font-family:system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem;color:#202124}}
-.badge{{display:inline-block;padding:.3rem .8rem;border-radius:6px;color:#fff;background:{color};font-weight:600}}
+body{{font-family:system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem}}
+.badge{{display:inline-block;padding:.3rem .8rem;border-radius:6px;color:#fff}}
+.badge{{background:{color};font-weight:600}}
 table{{border-collapse:collapse;width:100%;margin-top:1rem}}
 td,th{{border:1px solid #dadce0;padding:.4rem .6rem;text-align:left;font-size:.9rem}}
 code{{background:#f1f3f4;padding:.1rem .3rem;border-radius:4px;word-break:break-all}}

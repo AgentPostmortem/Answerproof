@@ -9,7 +9,10 @@ SOURCES = {
     "s3": "The Louvre is the world's most-visited museum, also in Paris.",
 }
 
-ANSWER = "The Eiffel Tower is a wrought-iron lattice tower in Paris, France. It was completed in 1889 and stands 330 metres tall."
+ANSWER = (
+    "The Eiffel Tower is a wrought-iron lattice tower in Paris, France. "
+    "It was completed in 1889 and stands 330 metres tall."
+)
 
 
 @pytest.fixture

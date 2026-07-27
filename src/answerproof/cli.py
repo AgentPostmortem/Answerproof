@@ -86,7 +86,10 @@ def cmd_inspect(args: argparse.Namespace) -> int:
     print(f"schema     : {p.schema_version}")
     print(f"query      : {p.query}")
     print(f"answer     : {p.answer}")
-    print(f"principal  : {p.principal.id} perms={p.principal.permissions} tenant={p.principal.tenant}")
+    print(
+        f"principal  : {p.principal.id} perms={p.principal.permissions} "
+        f"tenant={p.principal.tenant}"
+    )
     print(f"model      : {p.model.name} provider={p.model.provider} params={p.model.params}")
     print(f"merkle_root: {p.merkle_root}")
     print(f"signer     : {receipt.signature.public_key}")
