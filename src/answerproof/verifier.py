@@ -116,6 +116,20 @@ def verify_grounding(receipt: Receipt) -> CheckResult:
     return CheckResult("grounding", True, "citations and grounding are self-consistent")
 
 
+def build_inclusion_proof(receipt: Receipt, source_id: str) -> list[ProofStep]:
+    """Produce the Merkle inclusion proof for ``source_id`` in ``receipt``.
+
+    The proof can be handed to a third party (together with the source's content
+    hash and the receipt's signed ``merkle_root``) to prove membership without
+    disclosing the other sources.
+    """
+    ids = [s.id for s in receipt.payload.sources]
+    if source_id not in ids:
+        raise KeyError(f"unknown source {source_id}")
+    tree = MerkleTree.from_hashes([s.content_hash for s in receipt.payload.sources])
+    return tree.proof(ids.index(source_id))
+
+
 def verify_inclusion(receipt: Receipt, source_id: str, proof: list[ProofStep]) -> CheckResult:
     by_id = {s.id: s for s in receipt.payload.sources}
     source = by_id.get(source_id)
