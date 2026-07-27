@@ -1,5 +1,7 @@
+import pytest
+
 from answerproof.merkle import MerkleTree
-from answerproof.verifier import verify_inclusion, verify_receipt
+from answerproof.verifier import build_inclusion_proof, verify_inclusion, verify_receipt
 
 
 def test_valid_receipt_passes_all_checks(receipt, sources):
@@ -43,6 +45,17 @@ def test_inclusion_proof_roundtrip(receipt):
     proof = tree.proof(1)
     result = verify_inclusion(receipt, receipt.payload.sources[1].id, proof)
     assert result.passed
+
+
+def test_build_inclusion_proof_verifies(receipt):
+    for source in receipt.payload.sources:
+        proof = build_inclusion_proof(receipt, source.id)
+        assert verify_inclusion(receipt, source.id, proof).passed
+
+
+def test_build_inclusion_proof_unknown_source(receipt):
+    with pytest.raises(KeyError):
+        build_inclusion_proof(receipt, "nope")
 
 
 def test_inclusion_proof_unknown_source(receipt):
