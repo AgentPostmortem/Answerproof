@@ -56,6 +56,8 @@ A receipt **does not prove**:
 
 ## Install
 
+**PyPI:** https://pypi.org/project/answerproof/
+
 ```bash
 pip install answerproof            # core library + CLI
 pip install "answerproof[api]"     # + FastAPI verifier service
