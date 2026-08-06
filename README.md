@@ -2,7 +2,7 @@
 
 **Verifiable, tamper-evident receipts for RAG and agent answers.**
 
-![CI](https://github.com/royalpinto007/answerproof/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/AgentPostmortem/answerproof/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -211,7 +211,7 @@ def answer_with_receipt(query, retriever, llm, signing_key, principal):
 ## Run it locally
 
 ```bash
-git clone https://github.com/royalpinto007/answerproof
+git clone https://github.com/AgentPostmortem/answerproof
 cd answerproof
 pip install -e ".[dev]"
 pytest -q                       # full test suite

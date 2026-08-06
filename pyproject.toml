@@ -37,8 +37,8 @@ dev = [
 answerproof = "answerproof.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/royalpinto007/answerproof"
-Repository = "https://github.com/royalpinto007/answerproof"
+Homepage = "https://github.com/AgentPostmortem/answerproof"
+Repository = "https://github.com/AgentPostmortem/answerproof"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/answerproof"]
