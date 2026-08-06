@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "answerproof"
-version = "0.1.0"
+version = "0.1.1"
 description = "Verifiable, tamper-evident receipts for RAG and agent answers."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -37,8 +37,8 @@ dev = [
 answerproof = "answerproof.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/AgentPostmortem/answerproof"
-Repository = "https://github.com/AgentPostmortem/answerproof"
+Homepage = "https://github.com/AgentPostmortem/Answerproof"
+Repository = "https://github.com/AgentPostmortem/Answerproof"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/answerproof"]
