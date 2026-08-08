@@ -13,8 +13,10 @@ holds and what does not:
   consistent (cited ids exist; grounding score matches the claims).
 
 A receipt is ``valid`` only if every performed check passes. Checks that could
-not run (e.g. source contents not supplied) are reported as ``skipped`` and do
-not, by themselves, make a receipt invalid.
+not run (e.g. source contents not supplied, or no expected signer pinned) are
+reported as ``skipped`` and do not, by themselves, make a receipt invalid.
+Skipping ``signer_pin`` means the signature proves integrity against the
+embedded key only — not that the signer is a known, trusted party.
 """
 
 from __future__ import annotations
@@ -163,6 +165,13 @@ def verify_receipt(
                 pinned,
                 "" if pinned else "receipt public key does not match expected signer",
             )
+        )
+    else:
+        # Signature alone only proves integrity against the key carried in the
+        # receipt. Without a pin, an attacker who rewrote and re-signed with
+        # their own key also passes. Surface that the provenance check did not run.
+        skipped.append(
+            "signer_pin (no expected signer pinned; signature not tied to a known key)"
         )
 
     checks.append(verify_signature(receipt))

@@ -145,7 +145,15 @@ Every check is independent and reported separately:
 | `merkle`    | recomputed Merkle root matches the signed root                 |
 | `sources`   | supplied source contents hash to the recorded hashes           |
 | `grounding` | citations reference real sources; grounding score is honest    |
-| `signer_pin`| (optional) signer public key matches an expected key           |
+| `signer_pin`| signer public key matches an expected key                      |
+
+Checks that did not run appear in the verdict's `skipped` list rather than as
+passes. **`signer_pin` is skipped when you omit `expected_public_key` /
+`--expect-key`.** In that case the signature still proves integrity against the
+key *carried in the receipt*, but an attacker who rewrote the payload and
+re-signed with their own key would also get `valid: true`. Pin the signer to
+prove provenance; without a pin, the CLI prints a one-line warning and the
+JSON verdict lists `signer_pin` under `skipped`.
 
 ## Merkle inclusion proofs
 

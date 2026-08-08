@@ -81,6 +81,10 @@ def test_attacker_resigns_with_own_key_is_caught_by_pinning(receipt, sources):
         public_key=attacker.verify_key.to_base64(),
         signature=attacker.sign(forged.payload.canonical_bytes()),
     )
-    # Signature alone verifies (attacker's key), but pinning to the real signer fails.
-    assert verify_receipt(forged).valid
+    # Signature alone verifies (attacker's key) so structural checks pass, but
+    # the unpinned verdict must not look like a clean provenance pass: signer_pin
+    # is skipped. Pinning to the real signer fails outright.
+    unpinned = verify_receipt(forged)
+    assert unpinned.valid  # integrity against the (attacker) embedded key
+    assert any("signer_pin" in s for s in unpinned.skipped)
     assert not verify_receipt(forged, expected_public_key=original_pk).valid

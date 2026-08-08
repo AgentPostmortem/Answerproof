@@ -61,6 +61,12 @@ def cmd_verify(args: argparse.Namespace) -> int:
         receipt, source_contents=contents, expected_public_key=args.expect_key
     )
 
+    if args.expect_key is None:
+        print(
+            "warning: no --expect-key; signature is not tied to a known signer",
+            file=sys.stderr,
+        )
+
     if args.json:
         print(json.dumps(verdict.to_dict(), indent=2))
     else:
@@ -75,6 +81,11 @@ def cmd_verify(args: argparse.Namespace) -> int:
             print(line)
         for s in verdict.skipped:
             print(f"  [skip] {s}")
+        if args.expect_key is None and verdict.valid:
+            print(
+                "note: signer was not pinned; integrity of the payload against the "
+                "embedded key is proven, provenance is not"
+            )
     return 0 if verdict.valid else 1
 
 
