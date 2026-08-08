@@ -84,7 +84,11 @@ def test_verify_with_expect_key_no_warning(tmp_path, capsys, receipt):
     captured = capsys.readouterr()
     assert "VALID" in captured.out
     assert "no --expect-key" not in captured.err
-    assert "[ok ] signer_pin" in captured.out or "[ok] signer_pin" in captured.out or "signer_pin" in captured.out
+    assert (
+        "[ok ] signer_pin" in captured.out
+        or "[ok] signer_pin" in captured.out
+        or "signer_pin" in captured.out
+    )
 
 
 def test_verify_json_includes_skipped_signer_pin(tmp_path, capsys, receipt):
