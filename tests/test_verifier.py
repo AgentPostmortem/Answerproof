@@ -68,3 +68,44 @@ def test_serialized_receipt_roundtrips_and_verifies(receipt, sources):
 
     restored = Receipt.from_json(receipt.to_json())
     assert verify_receipt(restored, source_contents=sources).valid
+
+
+def test_unpinned_verify_skips_signer_pin(receipt, sources):
+    verdict = verify_receipt(receipt, source_contents=sources)
+    assert verdict.valid
+    assert any(s.startswith("signer_pin") for s in verdict.skipped)
+    assert all(c.name != "signer_pin" for c in verdict.checks)
+
+
+def test_pinned_verify_does_not_skip_signer_pin(receipt, sources):
+    pk = receipt.signature.public_key
+    verdict = verify_receipt(receipt, source_contents=sources, expected_public_key=pk)
+    assert verdict.valid
+    assert not any("signer_pin" in s for s in verdict.skipped)
+    assert any(c.name == "signer_pin" and c.passed for c in verdict.checks)
+
+
+def test_attacker_resign_is_not_presented_as_clean_pass(receipt):
+    """Tamper the payload, re-sign with a fresh key; unpinned verify must not
+    look like a fully proven receipt (signer_pin skipped)."""
+    import json
+
+    from answerproof.crypto import SigningKey
+    from answerproof.schema import Receipt, Signature
+
+    attacker = SigningKey.generate()
+    d = json.loads(receipt.to_json())
+    d["payload"]["answer"] = "Attacker-controlled answer."
+    forged = Receipt.from_json(json.dumps(d))
+    forged.signature = Signature(
+        public_key=attacker.verify_key.to_base64(),
+        signature=attacker.sign(forged.payload.canonical_bytes()),
+    )
+    verdict = verify_receipt(forged)
+    # Structural checks pass against the attacker's key...
+    assert verdict.valid
+    # ...but the verdict records that provenance was not established.
+    assert any("signer_pin" in s for s in verdict.skipped)
+    as_dict = verdict.to_dict()
+    assert as_dict["valid"] is True
+    assert any("signer_pin" in s for s in as_dict["skipped"])
