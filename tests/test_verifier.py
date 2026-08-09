@@ -68,3 +68,21 @@ def test_serialized_receipt_roundtrips_and_verifies(receipt, sources):
 
     restored = Receipt.from_json(receipt.to_json())
     assert verify_receipt(restored, source_contents=sources).valid
+
+
+def test_unknown_source_id_in_contents_fails_sources_check(receipt, sources):
+    """source_contents with an id the receipt never recorded must fail sources.
+
+    Callers sometimes pass a whole content map; unknown ids are a real boundary
+    and must surface as content-hash failures, not be silently skipped.
+    """
+    contents = dict(sources)
+    contents["never-retrieved"] = "This document was never part of the retrieval set."
+
+    verdict = verify_receipt(receipt, source_contents=contents)
+
+    assert not verdict.valid
+    failed = [c for c in verdict.checks if c.name == "sources" and not c.passed]
+    assert len(failed) == 1
+    assert "never-retrieved" in failed[0].detail
+    assert "unknown source" in failed[0].detail
