@@ -65,6 +65,10 @@ pip install "answerproof[api]"     # + FastAPI verifier service
 
 ## Quickstart
 
+```bash
+pip install answerproof
+```
+
 ```python
 from answerproof import ReceiptBuilder, SigningKey, verify_receipt
 
@@ -86,6 +90,21 @@ verdict = verify_receipt(
     source_contents={"doc-1": "The Eiffel Tower is 330 metres tall."},
 )
 assert verdict.valid
+print("valid:", verdict.valid)
+for check in verdict.checks:
+    mark = "ok" if check.passed else "FAIL"
+    detail = f" — {check.detail}" if check.detail else ""
+    print(f"  [{mark}] {check.name}{detail}")
+```
+
+Expected verification output (ids, timestamps, and digests will differ each run):
+
+```text
+valid: True
+  [ok] signature
+  [ok] merkle
+  [ok] grounding — citations and grounding are self-consistent
+  [ok] sources — 1 source content(s) matched
 ```
 
 ## Receipt anatomy
@@ -146,6 +165,66 @@ Every check is independent and reported separately:
 | `sources`   | supplied source contents hash to the recorded hashes           |
 | `grounding` | citations reference real sources; grounding score is honest    |
 | `signer_pin`| (optional) signer public key matches an expected key           |
+
+### What failure looks like
+
+`examples/tamper.py` builds a valid receipt, then walks each failure mode and
+prints the verdict. Run it with:
+
+```bash
+python examples/tamper.py
+```
+
+Representative output (keys and digests vary per run):
+
+```text
+=== Genuine receipt ===
+valid: True
+  [ok] signature
+  [ok] merkle
+  [ok] grounding — citations and grounding are self-consistent
+  [ok] sources — 3 source content(s) matched
+
+=== 1. Source document edited after signing ===
+valid: False
+  [ok] signature
+  [ok] merkle
+  [ok] grounding — citations and grounding are self-consistent
+  [FAIL] sources — content hash mismatch: s1
+
+=== 2. Citation swapped to a different source id ===
+valid: False
+  [FAIL] signature — Ed25519 signature does not match payload
+  [ok] merkle
+  [FAIL] grounding — citation references unknown source not-a-real-source
+  [ok] sources — 3 source content(s) matched
+
+=== 3. Merkle root edited by hand ===
+valid: False
+  [FAIL] signature — Ed25519 signature does not match payload
+  [FAIL] merkle — recomputed Merkle root does not match signed root
+  [ok] grounding — citations and grounding are self-consistent
+  [ok] sources — 3 source content(s) matched
+
+=== 4a. Re-signed with attacker's key (no pin) ===
+valid: True
+  [ok] signature
+  [ok] merkle
+  [ok] grounding — citations and grounding are self-consistent
+  [ok] sources — 3 source content(s) matched
+
+=== 4b. Same receipt, signer pinned to the original key ===
+valid: False
+  [FAIL] signer_pin — receipt public key does not match expected signer
+  [ok] signature
+  [ok] merkle
+  [ok] grounding — citations and grounding are self-consistent
+  [ok] sources — 3 source content(s) matched
+```
+
+Case 4 is the interesting one: re-signing with a different key makes the
+signature check pass again. Only pinning the expected public key (`signer_pin`)
+catches the substitution — integrity alone is not provenance.
 
 ## Merkle inclusion proofs
 
@@ -218,6 +297,7 @@ cd answerproof
 pip install -e ".[dev]"
 pytest -q                       # full test suite
 python examples/demo_rag.py     # produce + verify a receipt, then tamper and re-verify
+python examples/tamper.py       # walk each failure mode (sources, grounding, merkle, re-sign)
 ```
 
 ## Contributing
