@@ -147,6 +147,50 @@ Every check is independent and reported separately:
 | `grounding` | citations reference real sources; grounding score is honest    |
 | `signer_pin`| (optional) signer public key matches an expected key           |
 
+### What failure looks like
+
+Run the tamper walkthrough with no external services:
+
+```bash
+python examples/tamper.py
+```
+
+It edits one part of a genuine receipt at a time and prints the independent
+checks that reject each change:
+
+```text
+=== Genuine receipt ===
+valid: True
+
+=== Source document edited after signing ===
+valid: False
+  [FAIL] sources - content hash mismatch: doc-eiffel
+
+=== Citation changed to an unknown source ===
+valid: False
+  [FAIL] signature - Ed25519 signature does not match payload
+  [FAIL] grounding - citation references unknown source doc-unknown
+
+=== Merkle root edited by hand ===
+valid: False
+  [FAIL] signature - Ed25519 signature does not match payload
+  [FAIL] merkle - recomputed Merkle root does not match signed root
+
+=== Payload edited and re-signed with another key (unpinned) ===
+valid: True
+  [PASS] signature
+
+=== Same re-signed receipt with the original signer pinned ===
+valid: False
+  [FAIL] signer_pin - receipt public key does not match expected signer
+  [PASS] signature
+```
+
+The last two verdicts are the key-trust boundary in concrete form. A valid
+signature proves that the payload was signed by the public key embedded in the
+receipt. To prove that a known issuer signed it, pass that issuer's public key
+as `expected_public_key`.
+
 ## Merkle inclusion proofs
 
 Prove one source was in the retrieval set without revealing the rest:
@@ -218,6 +262,7 @@ cd answerproof
 pip install -e ".[dev]"
 pytest -q                       # full test suite
 python examples/demo_rag.py     # produce + verify a receipt, then tamper and re-verify
+python examples/tamper.py       # inspect four tamper paths and signer pinning
 ```
 
 ## Contributing
