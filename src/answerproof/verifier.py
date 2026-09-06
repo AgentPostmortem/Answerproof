@@ -73,7 +73,7 @@ def verify_merkle(receipt: Receipt) -> CheckResult:
 
 
 def verify_sources(receipt: Receipt, contents: dict[str, str]) -> CheckResult:
-    """Check that supplied source contents match their recorded hashes."""
+    """Check that every recorded source has supplied, matching content."""
     by_id = {s.id: s for s in receipt.payload.sources}
     mismatched: list[str] = []
     checked = 0
@@ -85,8 +85,14 @@ def verify_sources(receipt: Receipt, contents: dict[str, str]) -> CheckResult:
         checked += 1
         if not verify_content(content, source.content_hash):
             mismatched.append(sid)
+    missing = [source.id for source in receipt.payload.sources if source.id not in contents]
+    problems: list[str] = []
     if mismatched:
-        return CheckResult("sources", False, "content hash mismatch: " + ", ".join(mismatched))
+        problems.append("content hash mismatch: " + ", ".join(mismatched))
+    if missing:
+        problems.append("missing source content: " + ", ".join(missing))
+    if problems:
+        return CheckResult("sources", False, "; ".join(problems))
     return CheckResult("sources", True, f"{checked} source content(s) matched")
 
 
@@ -148,9 +154,10 @@ def verify_receipt(
 ) -> Verdict:
     """Run all applicable checks and return a :class:`Verdict`.
 
-    ``source_contents`` maps source id -> original content; when supplied the
-    hashes are verified. ``expected_public_key`` pins the signer: if given and
-    it does not match the receipt's key, verification fails.
+    ``source_contents`` maps every source id to its original content; when the
+    mapping is supplied, missing entries and hash mismatches fail verification.
+    ``expected_public_key`` pins the signer: if given and it does not match the
+    receipt's key, verification fails.
     """
     checks: list[CheckResult] = []
     skipped: list[str] = []
@@ -169,7 +176,7 @@ def verify_receipt(
     checks.append(verify_merkle(receipt))
     checks.append(verify_grounding(receipt))
 
-    if source_contents:
+    if source_contents is not None:
         checks.append(verify_sources(receipt, source_contents))
     else:
         skipped.append("sources (no source contents supplied)")

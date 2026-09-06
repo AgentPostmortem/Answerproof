@@ -13,6 +13,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Explicitly supplied source contents must now cover every source in the
+  receipt; empty and partial mappings report the missing source IDs and fail
+  verification.
+
 ## [0.1.0] - 2026-07-27
 
 ### Added

@@ -18,6 +18,33 @@ def test_verify_without_sources_skips_source_check(receipt):
     assert any("sources" in s for s in verdict.skipped)
 
 
+def test_explicit_empty_source_contents_fails_with_all_missing_ids(receipt):
+    verdict = verify_receipt(receipt, source_contents={})
+
+    assert not verdict.valid
+    source_check = next(c for c in verdict.checks if c.name == "sources")
+    assert not source_check.passed
+    assert source_check.detail == "missing source content: s1, s2, s3"
+
+
+def test_partial_source_contents_fails_with_uncovered_ids(receipt, sources):
+    verdict = verify_receipt(receipt, source_contents={"s1": sources["s1"]})
+
+    assert not verdict.valid
+    source_check = next(c for c in verdict.checks if c.name == "sources")
+    assert not source_check.passed
+    assert source_check.detail == "missing source content: s2, s3"
+
+
+def test_wrong_and_partial_source_contents_report_both_failures(receipt):
+    verdict = verify_receipt(receipt, source_contents={"s1": "wrong"})
+
+    source_check = next(c for c in verdict.checks if c.name == "sources")
+    assert source_check.detail == (
+        "content hash mismatch: s1; missing source content: s2, s3"
+    )
+
+
 def test_signer_pinning_success(receipt, sources):
     pk = receipt.signature.public_key
     verdict = verify_receipt(receipt, source_contents=sources, expected_public_key=pk)
