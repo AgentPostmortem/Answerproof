@@ -57,7 +57,10 @@ class Verdict:
 
 
 def verify_signature(receipt: Receipt) -> CheckResult:
-    vk = VerifyKey.from_base64(receipt.signature.public_key)
+    try:
+        vk = VerifyKey.from_base64(receipt.signature.public_key)
+    except ValueError:
+        return CheckResult("signature", False, "invalid Ed25519 public key")
     ok = vk.verify(receipt.payload.canonical_bytes(), receipt.signature.signature)
     return CheckResult("signature", ok, "" if ok else "Ed25519 signature does not match payload")
 
