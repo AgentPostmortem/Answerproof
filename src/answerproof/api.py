@@ -10,6 +10,7 @@ the extra with ``pip install answerproof[api]``.
 
 from __future__ import annotations
 
+import html
 from typing import Any
 
 try:
@@ -77,13 +78,13 @@ def _render_page(receipt: Receipt, verdict) -> str:
     color = "#137333" if verdict.valid else "#c5221f"
     status = "VALID" if verdict.valid else "INVALID"
     rows = "".join(
-        f"<tr><td>{'ok' if c.passed else 'FAIL'}</td><td>{c.name}</td>"
-        f"<td>{c.detail or ''}</td></tr>"
+        f"<tr><td>{'ok' if c.passed else 'FAIL'}</td><td>{html.escape(str(c.name))}</td>"
+        f"<td>{html.escape(str(c.detail or ''))}</td></tr>"
         for c in verdict.checks
     )
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<title>answerproof receipt {p.receipt_id}</title>
+<title>answerproof receipt {html.escape(p.receipt_id)}</title>
 <style>
 body{{font-family:system-ui,sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem}}
 .badge{{display:inline-block;padding:.3rem .8rem;border-radius:6px;color:#fff}}
@@ -94,12 +95,12 @@ code{{background:#f1f3f4;padding:.1rem .3rem;border-radius:4px;word-break:break-
 </style></head><body>
 <h1>answerproof receipt</h1>
 <p class="badge">{status}</p>
-<p><strong>Receipt:</strong> <code>{p.receipt_id}</code></p>
-<p><strong>Query:</strong> {p.query}</p>
-<p><strong>Answer:</strong> {p.answer}</p>
-<p><strong>Signer:</strong> <code>{receipt.signature.public_key}</code></p>
-<p><strong>Merkle root:</strong> <code>{p.merkle_root}</code></p>
-<p><strong>Grounding score:</strong> {p.grounding.grounding_score}</p>
+<p><strong>Receipt:</strong> <code>{html.escape(p.receipt_id)}</code></p>
+<p><strong>Query:</strong> {html.escape(p.query)}</p>
+<p><strong>Answer:</strong> {html.escape(p.answer)}</p>
+<p><strong>Signer:</strong> <code>{html.escape(receipt.signature.public_key)}</code></p>
+<p><strong>Merkle root:</strong> <code>{html.escape(p.merkle_root)}</code></p>
+<p><strong>Grounding score:</strong> {html.escape(str(p.grounding.grounding_score))}</p>
 <table><thead><tr><th>result</th><th>check</th><th>detail</th></tr></thead>
 <tbody>{rows}</tbody></table>
 </body></html>"""
