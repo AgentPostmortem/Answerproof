@@ -17,6 +17,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Verification now reports malformed embedded Ed25519 public keys as a failed
   signature check instead of raising a decoding exception.
+- `verify` and `inspect` now report unreadable or invalid receipt files as
+  one-line CLI errors instead of raising tracebacks.
 
 ## [0.1.0] - 2026-07-27
 
