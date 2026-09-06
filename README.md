@@ -143,7 +143,7 @@ Every check is independent and reported separately:
 | ----------- | -------------------------------------------------------------- |
 | `signature` | payload is unmodified and signed by the embedded key           |
 | `merkle`    | recomputed Merkle root matches the signed root                 |
-| `sources`   | supplied source contents hash to the recorded hashes           |
+| `sources`   | every recorded source has supplied content matching its hash   |
 | `grounding` | citations reference real sources; grounding score is honest    |
 | `signer_pin`| (optional) signer public key matches an expected key           |
 
@@ -214,7 +214,7 @@ Merkle forgery vectors.
 answerproof keygen                        # print a keypair as JSON
 answerproof keygen --out id.key           # write id.key and id.key.pub
 answerproof verify receipt.json           # verify (exit 0 = valid, 1 = invalid)
-answerproof verify receipt.json --sources sources.json --json
+answerproof verify receipt.json --sources sources.json --json  # complete source-id mapping
 answerproof verify receipt.json --expect-key <base64>   # pin the signer
 answerproof inspect receipt.json          # human-readable summary
 ```

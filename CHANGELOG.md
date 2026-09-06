@@ -15,6 +15,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Explicitly supplied source contents must now cover every source in the
+  receipt; empty and partial mappings report the missing source IDs and fail
+  verification.
 - Verification now reports malformed embedded Ed25519 public keys as a failed
   signature check instead of raising a decoding exception.
 - `verify` and `inspect` now report unreadable or invalid receipt files as
