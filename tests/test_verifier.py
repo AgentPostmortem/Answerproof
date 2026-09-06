@@ -59,6 +59,27 @@ def test_signer_pinning_failure(receipt, sources):
     assert any(c.name == "signer_pin" and not c.passed for c in verdict.checks)
 
 
+@pytest.mark.parametrize(
+    "malformed_key",
+    [
+        "!!!not-base64!!!",
+        "c2hvcnQ",
+        "not-ascii-🔑",
+    ],
+)
+def test_malformed_public_key_returns_failed_signature_check(receipt, malformed_key):
+    signature = receipt.signature.model_copy(update={"public_key": malformed_key})
+    corrupted = receipt.model_copy(update={"signature": signature})
+
+    verdict = verify_receipt(corrupted)
+
+    assert not verdict.valid
+    assert len(verdict.failures()) == 1
+    failure = verdict.failures()[0]
+    assert failure.name == "signature"
+    assert failure.detail == "invalid Ed25519 public key"
+
+
 def test_wrong_source_content_fails(receipt):
     bad = {"s1": "This is not the original content."}
     verdict = verify_receipt(receipt, source_contents=bad)

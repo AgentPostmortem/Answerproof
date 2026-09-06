@@ -23,9 +23,17 @@ from .schema import Receipt
 from .verifier import verify_receipt
 
 
+class ReceiptLoadError(Exception):
+    """Raised when a receipt file cannot be read or validated."""
+
+
 def _load_receipt(path: str) -> Receipt:
-    text = Path(path).read_text(encoding="utf-8")
-    return Receipt.from_json(text)
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+        return Receipt.from_json(text)
+    except (OSError, UnicodeError, ValueError) as exc:
+        detail = str(exc).splitlines()[0]
+        raise ReceiptLoadError(f"cannot load receipt {path!r}: {detail}") from exc
 
 
 def cmd_keygen(args: argparse.Namespace) -> int:
@@ -130,7 +138,11 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return args.func(args)
+    try:
+        return args.func(args)
+    except ReceiptLoadError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
