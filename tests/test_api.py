@@ -5,6 +5,7 @@ import pytest
 fastapi = pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient  # noqa: E402
 
+from answerproof import ReceiptBuilder, SigningKey  # noqa: E402
 from answerproof.api import create_app  # noqa: E402
 
 
@@ -45,3 +46,29 @@ def test_verify_page_renders_html(client, receipt, sources):
     assert r.status_code == 200
     assert "text/html" in r.headers["content-type"]
     assert "VALID" in r.text
+
+
+def test_verify_page_escapes_receipt_fields(client):
+    query = "<script>alert(1)</script>"
+    answer = "<img src=x onerror=alert(2)>"
+    receipt = (
+        ReceiptBuilder(SigningKey.generate())
+        .set_query(query)
+        .set_answer(answer)
+        .add_source("s1", content="safe source content")
+        .finalize(receipt_id="xss-test")
+    )
+
+    response = client.post(
+        "/verify/page",
+        json={
+            "receipt": json.loads(receipt.to_json()),
+            "source_contents": {"s1": "safe source content"},
+        },
+    )
+
+    assert response.status_code == 200
+    assert "<script>" not in response.text
+    assert "<img src=x" not in response.text
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in response.text
+    assert "&lt;img src=x onerror=alert(2)&gt;" in response.text
