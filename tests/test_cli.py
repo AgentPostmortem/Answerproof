@@ -62,6 +62,35 @@ def test_inspect(tmp_path, capsys, receipt):
     assert "merkle_root" in out
 
 
+@pytest.mark.parametrize("command", ["verify", "inspect"])
+def test_receipt_command_reports_missing_file(command, tmp_path, capsys):
+    missing = tmp_path / "missing.json"
+
+    rc = main([command, str(missing)])
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert captured.out == ""
+    assert captured.err.startswith(f"error: cannot load receipt '{missing}':")
+    assert "Traceback" not in captured.err
+    assert len(captured.err.splitlines()) == 1
+
+
+@pytest.mark.parametrize("command", ["verify", "inspect"])
+def test_receipt_command_reports_invalid_json(command, tmp_path, capsys):
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text("not json", encoding="utf-8")
+
+    rc = main([command, str(invalid)])
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert captured.out == ""
+    assert captured.err.startswith(f"error: cannot load receipt '{invalid}':")
+    assert "Traceback" not in captured.err
+    assert len(captured.err.splitlines()) == 1
+
+
 def test_missing_command_errors():
     with pytest.raises(SystemExit):
         main([])
