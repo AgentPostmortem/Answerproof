@@ -13,6 +13,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- `verify` and `inspect` now report unreadable or invalid receipt files as
+  one-line CLI errors instead of raising tracebacks.
+
 ## [0.1.0] - 2026-07-27
 
 ### Added
