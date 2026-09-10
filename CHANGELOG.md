@@ -15,6 +15,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- `ReceiptBuilder` now rejects `ngram < 1` and out-of-range `threshold` values at construction so degenerate n-gram sets cannot produce a perfect grounding score.
+
 - Explicitly supplied source contents must now cover every source in the
   receipt; empty and partial mappings report the missing source IDs and fail
   verification.
