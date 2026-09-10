@@ -93,3 +93,28 @@ def test_source_order_is_preserved(sk):
         b.add_source(f"s{i}", content=f"content {i}")
     receipt = b.finalize()
     assert [s.id for s in receipt.payload.sources] == [f"s{i}" for i in range(5)]
+
+
+def test_rejects_zero_ngram(sk):
+    with pytest.raises(ValueError, match="ngram"):
+        ReceiptBuilder(sk, ngram=0)
+
+
+def test_rejects_negative_ngram(sk):
+    with pytest.raises(ValueError, match="ngram"):
+        ReceiptBuilder(sk, ngram=-1)
+
+
+def test_rejects_threshold_above_one(sk):
+    with pytest.raises(ValueError, match="threshold"):
+        ReceiptBuilder(sk, threshold=1.5)
+
+
+def test_rejects_threshold_below_zero(sk):
+    with pytest.raises(ValueError, match="threshold"):
+        ReceiptBuilder(sk, threshold=-0.1)
+
+
+def test_accepts_boundary_threshold(sk):
+    ReceiptBuilder(sk, ngram=1, threshold=0.0)
+    ReceiptBuilder(sk, ngram=1, threshold=1.0)
