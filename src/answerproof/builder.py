@@ -36,9 +36,15 @@ class ReceiptBuilder:
     """Collects the facts of one RAG request and produces a signed receipt."""
 
     def __init__(self, signing_key: SigningKey, *, ngram: int = 3, threshold: float = 0.5):
+        if not isinstance(ngram, int) or isinstance(ngram, bool) or ngram < 1:
+            raise ValueError("ngram must be an integer >= 1")
+        if not isinstance(threshold, (int, float)) or isinstance(threshold, bool):
+            raise ValueError("threshold must be a number between 0 and 1 inclusive")
+        if threshold < 0 or threshold > 1:
+            raise ValueError("threshold must be a number between 0 and 1 inclusive")
         self._signing_key = signing_key
         self._ngram = ngram
-        self._threshold = threshold
+        self._threshold = float(threshold)
         self._query: str | None = None
         self._answer: str | None = None
         self._principal = Principal(id="anonymous")
