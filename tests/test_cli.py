@@ -43,6 +43,25 @@ def test_verify_with_sources_json(tmp_path, capsys, receipt, sources):
     assert verdict["valid"] is True
 
 
+@pytest.mark.parametrize(
+    "contents", [None, b"{", b"\xff"], ids=["missing", "invalid-json", "invalid-utf8"]
+)
+def test_verify_reports_invalid_sources_file(tmp_path, capsys, receipt, contents):
+    path = _write_receipt(tmp_path, receipt)
+    sources = tmp_path / "sources.json"
+    if contents is not None:
+        sources.write_bytes(contents)
+
+    rc = main(["verify", str(path), "--sources", str(sources), "--json"])
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert captured.out == ""
+    assert captured.err.startswith(f"error: cannot load sources {str(sources)!r}:")
+    assert "Traceback" not in captured.err
+    assert len(captured.err.splitlines()) == 1
+
+
 def test_verify_tampered_returns_nonzero(tmp_path, capsys, receipt):
     d = json.loads(receipt.to_json())
     d["payload"]["answer"] = "tampered"
@@ -71,7 +90,7 @@ def test_receipt_command_reports_missing_file(command, tmp_path, capsys):
     captured = capsys.readouterr()
     assert rc == 2
     assert captured.out == ""
-    assert captured.err.startswith(f"error: cannot load receipt '{missing}':")
+    assert captured.err.startswith(f"error: cannot load receipt {str(missing)!r}:")
     assert "Traceback" not in captured.err
     assert len(captured.err.splitlines()) == 1
 
@@ -86,7 +105,7 @@ def test_receipt_command_reports_invalid_json(command, tmp_path, capsys):
     captured = capsys.readouterr()
     assert rc == 2
     assert captured.out == ""
-    assert captured.err.startswith(f"error: cannot load receipt '{invalid}':")
+    assert captured.err.startswith(f"error: cannot load receipt {str(invalid)!r}:")
     assert "Traceback" not in captured.err
     assert len(captured.err.splitlines()) == 1
 
