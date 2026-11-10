@@ -59,7 +59,12 @@ def cmd_verify(args: argparse.Namespace) -> int:
     receipt = _load_receipt(args.receipt)
     contents: dict[str, str] | None = None
     if args.sources:
-        raw = json.loads(Path(args.sources).read_text(encoding="utf-8"))
+        try:
+            raw = json.loads(Path(args.sources).read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            detail = str(exc).splitlines()[0]
+            print(f"error: cannot load sources {args.sources!r}: {detail}", file=sys.stderr)
+            return 2
         if not isinstance(raw, dict):
             print("error: --sources file must be a JSON object of id -> content", file=sys.stderr)
             return 2

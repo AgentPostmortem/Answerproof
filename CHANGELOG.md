@@ -24,6 +24,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   signature check instead of raising a decoding exception.
 - `verify` and `inspect` now report unreadable or invalid receipt files as
   one-line CLI errors instead of raising tracebacks.
+- `verify --sources` reports unreadable or malformed source files as a one-line
+  CLI error.
 
 ## [0.1.0] - 2026-07-27
 
